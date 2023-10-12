@@ -33,7 +33,7 @@ fun play(game: Game = generateClassicGame()) {
                         return
                     }
                     ShootingOutcome.EATEN_BY_WUMPUS -> {
-                        printDefeatMessage("The missed and the Wumpus found you and ate you!")
+                        printDefeatMessage("You missed and the Wumpus found you and ate you!")
                         return
                     }
                 }
