@@ -9,4 +9,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "wumpus"
-include("core", "console")
+include("core", "console", "tgbot")
