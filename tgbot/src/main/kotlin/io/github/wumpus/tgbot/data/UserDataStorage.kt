@@ -3,8 +3,31 @@ package io.github.wumpus.tgbot.data
 import dev.inmo.tgbotapi.types.IdChatIdentifier
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.decodeFromStream
+import kotlinx.serialization.json.encodeToStream
+import java.nio.file.Path
+import kotlin.io.path.inputStream
+import kotlin.io.path.outputStream
 
-class UserDataStorage(private val data: MutableMap<IdChatIdentifier, Pair<UserData, Mutex>> = mutableMapOf()) {
+class UserDataStorage(data: Map<IdChatIdentifier, UserData> = mutableMapOf()) {
+    companion object {
+        @OptIn(ExperimentalSerializationApi::class)
+        fun fromFile(path: Path): UserDataStorage {
+            val data = try {
+                path.inputStream().use { inp ->
+                    Json.decodeFromStream<Map<IdChatIdentifier, UserData>>(inp)
+                }
+            } catch (e: SerializationException) {
+                throw IllegalArgumentException("Cannot create user data storage from $path", e)
+            }
+            return UserDataStorage(data)
+        }
+    }
+
+    private val data = data.entries.associateTo(mutableMapOf()) { it.key to (it.value to Mutex()) }
     private val globalMutex = Mutex()
 
     private suspend fun getLockableState(id: IdChatIdentifier) =
@@ -38,6 +61,21 @@ class UserDataStorage(private val data: MutableMap<IdChatIdentifier, Pair<UserDa
             } finally {
                 data.values.forEach { (_, mutex) -> mutex.unlock(owner) }
             }
+        }
+    }
+
+    @OptIn(ExperimentalSerializationApi::class)
+    suspend fun saveTo(path: Path, doLocked: Boolean = true) {
+        val save = {
+            val dataSnapshot = data.entries.associate {
+                it.value.let { (userData, _) -> it.key to userData }
+            }
+            path.outputStream().use { out -> Json.encodeToStream(dataSnapshot, out) }
+        }
+        if (doLocked) {
+            withFullLock("saveTo", save)
+        } else {
+            save()
         }
     }
 }

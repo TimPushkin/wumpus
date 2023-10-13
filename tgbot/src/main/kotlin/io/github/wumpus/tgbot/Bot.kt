@@ -42,12 +42,14 @@ import io.github.wumpus.tgbot.data.UserDataStorage
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.runBlocking
+import java.nio.file.Path
+import kotlin.io.path.exists
 
 private val LOG = KotlinLogging.logger { }
 
-class Bot(token: String) : AutoCloseable {
+class Bot(token: String, private val userDataPath: Path) : AutoCloseable {
     private val bot = telegramBot(token)
-    private val users = UserDataStorage()  // TODO: replace with a proper database
+    private val users = if (userDataPath.exists()) UserDataStorage.fromFile(userDataPath) else UserDataStorage()
 
     suspend fun start(): Job {
         warnIfCanJoinGroups()
@@ -320,7 +322,12 @@ class Bot(token: String) : AutoCloseable {
 
     override fun close() {
         LOG.debug { "Finishing" }
-        runBlocking { users.withFullLock("closing") { bot.close() } }
+        runBlocking {
+            users.withFullLock("closing") {
+                bot.close()
+                users.saveTo(userDataPath, doLocked = false)
+            }
+        }
         LOG.info { "Finished" }
     }
 }
