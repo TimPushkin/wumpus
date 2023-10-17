@@ -133,7 +133,11 @@ class Bot(token: String, private val userDataPath: Path) : AutoCloseable {
                 for ((chatId, score) in users.getScores().sortedByDescending { (_, score) -> score }) {
                     if (size == topN) break
                     if (score == 0) continue
-                    (getChat(chatId) as? UsernameChat)?.username?.run { add(username.removePrefix("@") to score) }
+                    // getChat() throws on unknown ID -- this should not normally happen, unless we re-create a new bot
+                    // with a users database from some other bot or just insert a random chat ID in the database
+                    val name = (runCatching { getChat(chatId) }.getOrNull() as? UsernameChat)?.username?.username
+                        ?: "Anonymous hunter"
+                    add(name.removePrefix("@") to score)
                 }
             }
             sendTextMessage(chat, Narration.narrateLeaderboard(score, leaderboard), HTMLParseMode)
