@@ -9,7 +9,7 @@ kotlin {
 }
 
 application {
-    mainClass.set("io.github.wumpus.tgbot.AppKt")
+    mainClass = "io.github.wumpus.tgbot.AppKt"
 }
 
 dependencies {
@@ -23,4 +23,15 @@ dependencies {
 
     implementation("org.slf4j:slf4j-simple:2.0.12")
     implementation("io.github.oshai:kotlin-logging-jvm:6.0.3")
+}
+
+// Make 'jar' command create executable JAR with dependencies
+tasks.withType<Jar> {
+    manifest {
+        attributes("Main-Class" to application.mainClass)
+    }
+    from(
+        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+    )
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
