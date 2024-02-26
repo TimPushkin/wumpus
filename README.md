@@ -18,7 +18,7 @@ java -jar ./console/build/libs/console.jar
 
 ## Telegram bot
 
-<img src="https://i.ibb.co/6FQ8NJ9/wumpus-tg-bot.gif" alt="Playing via Telegram bot" width=50%>
+![Playing via Telegram bot](https://i.ibb.co/v1j7gPc/wumpus-tg-small.gif)
 
 You need a Telegram bot token to launch the game in this mode. You can obtain one in a couple of minutes by following
 [these instructions](https://core.telegram.org/bots/tutorial#obtain-your-bot-token).
