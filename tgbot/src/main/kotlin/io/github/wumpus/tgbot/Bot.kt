@@ -20,6 +20,7 @@ import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onComman
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onMessageDataCallbackQuery
 import dev.inmo.tgbotapi.extensions.behaviour_builder.triggers_handling.onText
 import dev.inmo.tgbotapi.types.BotCommand
+import dev.inmo.tgbotapi.types.LinkPreviewOptions
 import dev.inmo.tgbotapi.types.MessageId
 import dev.inmo.tgbotapi.types.buttons.ReplyKeyboardRemove
 import dev.inmo.tgbotapi.types.chat.Chat
@@ -120,7 +121,7 @@ class Bot(token: String, private val userDataPath: Path) : AutoCloseable {
                 chat,
                 Narration.INSTRUCTIONS,
                 HTMLParseMode,
-                disableWebPagePreview = true,
+                linkPreviewOptions = LinkPreviewOptions.Disabled,
                 replyMarkup = Keyboards.PLAY_REPLY_KEYBOARD.takeIf { gameState == null }
             )
         }
@@ -135,7 +136,7 @@ class Bot(token: String, private val userDataPath: Path) : AutoCloseable {
                     if (score == 0) continue
                     // getChat() throws on unknown ID -- this should not normally happen, unless we re-create a new bot
                     // with a users database from some other bot or just insert a random chat ID in the database
-                    val name = (runCatching { getChat(chatId) }.getOrNull() as? UsernameChat)?.username?.username
+                    val name = (runCatching { getChat(chatId) }.getOrNull() as? UsernameChat)?.username?.full
                         ?: "Anonymous hunter"
                     add(name.removePrefix("@") to score)
                 }
