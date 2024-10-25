@@ -123,6 +123,7 @@ class Game private constructor(
                 }
             )
             if (currentArrowRoom.id == wumpusRoomId) {
+                isWumpusShot = true
                 return ShootingOutcome.DEFEATED_WUMPUS
             }
             if (currentArrowRoom.id == hunterRoomId) {
