@@ -10,7 +10,7 @@ enum class MovementOutcome {
     /** The hunter moved into a room with a bottomless pit and fell into it. */
     FALLEN_INTO_PIT,
 
-    /** The hunter either moved into the Wumpus' room and was eaten. */
+    /** The hunter moved into the Wumpus' room and was eaten. */
     EATEN_BY_WUMPUS
 }
 
